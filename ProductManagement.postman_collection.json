@@ -1,0 +1,413 @@
+{
+  "info": {
+    "name": "Product Management API",
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "description": "RESTful API collection for Product Management system (Products & Categories)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "category_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "GET All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (default: 10)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "RegEx search on category name (e.g. ^Elec or phone$)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ดึงรายการหมวดหมู่ทั้งหมดแบบ pagination รองรับ regex search ด้วย query param `search`"
+          },
+          "response": []
+        },
+        {
+          "name": "GET All Categories (with RegEx Search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories?page=1&limit=10&search=^Elec",
+              "host": ["{{base_url}}"],
+              "path": ["categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "^Elec",
+                  "description": "RegEx: name starts with 'Elec'"
+                }
+              ]
+            },
+            "description": "ค้นหาหมวดหมู่ด้วย Regular Expression"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/category/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["category", "{{category_id}}"]
+            },
+            "description": "ดึงข้อมูลหมวดหมู่ตาม MongoDB ObjectId"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.data && json.data._id) {",
+                  "    pm.collectionVariables.set('category_id', json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics\",\n  \"description\": \"Electronic devices and gadgets\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/category",
+              "host": ["{{base_url}}"],
+              "path": ["category"]
+            },
+            "description": "เพิ่มหมวดหมู่ใหม่ (auto-saves _id to {{category_id}} variable)"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics & Gadgets\",\n  \"description\": \"Updated description for electronics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/category/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["category", "{{category_id}}"]
+            },
+            "description": "แก้ไขข้อมูลหมวดหมู่ตาม ID"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Category (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/category/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["category", "{{category_id}}"],
+              "query": [
+                {
+                  "key": "hard",
+                  "value": "true",
+                  "description": "ตั้งเป็น true เพื่อ hard delete (ลบถาวรออกจาก DB)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ลบหมวดหมู่แบบ soft delete (ตั้ง isDeleted: true) — เพิ่ม ?hard=true เพื่อลบถาวร"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Category (Hard Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/category/{{category_id}}?hard=true",
+              "host": ["{{base_url}}"],
+              "path": ["category", "{{category_id}}"],
+              "query": [
+                {
+                  "key": "hard",
+                  "value": "true",
+                  "description": "ลบถาวรออกจาก DB"
+                }
+              ]
+            },
+            "description": "ลบหมวดหมู่แบบ hard delete (ลบถาวรออกจาก DB)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "GET All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (default: 10)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "RegEx search on product name (e.g. iphone or ^Sam)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ดึงรายการสินค้าทั้งหมดแบบ pagination พร้อม populate ข้อมูล category"
+          },
+          "response": []
+        },
+        {
+          "name": "GET All Products (with RegEx Search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?page=1&limit=10&search=iphone",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "iphone",
+                  "description": "RegEx: name contains 'iphone'"
+                }
+              ]
+            },
+            "description": "ค้นหาสินค้าด้วย Regular Expression"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/product/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["product", "{{product_id}}"]
+            },
+            "description": "ดึงข้อมูลสินค้าตาม MongoDB ObjectId พร้อม populate category"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.success && json.data && json.data._id) {",
+                  "    pm.collectionVariables.set('product_id', json.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 15\",\n  \"price\": 35900,\n  \"description\": \"Apple iPhone 15 128GB\",\n  \"image\": \"https://example.com/iphone15.jpg\",\n  \"categoryId\": \"{{category_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/product",
+              "host": ["{{base_url}}"],
+              "path": ["product"]
+            },
+            "description": "เพิ่มสินค้าใหม่ (auto-saves _id to {{product_id}} variable). ใส่ categoryId เป็น ObjectId ของ category"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"price\": 42900,\n  \"description\": \"Apple iPhone 15 Pro 256GB\",\n  \"image\": \"https://example.com/iphone15pro.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/product/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["product", "{{product_id}}"]
+            },
+            "description": "แก้ไขข้อมูลสินค้าตาม ID"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Product (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/product/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["product", "{{product_id}}"],
+              "query": [
+                {
+                  "key": "hard",
+                  "value": "true",
+                  "description": "ตั้งเป็น true เพื่อ hard delete (ลบถาวรออกจาก DB)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ลบสินค้าแบบ soft delete (ตั้ง isDeleted: true) — เพิ่ม ?hard=true เพื่อลบถาวร"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Product (Hard Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/product/{{product_id}}?hard=true",
+              "host": ["{{base_url}}"],
+              "path": ["product", "{{product_id}}"],
+              "query": [
+                {
+                  "key": "hard",
+                  "value": "true",
+                  "description": "ลบถาวรออกจาก DB"
+                }
+              ]
+            },
+            "description": "ลบสินค้าแบบ hard delete (ลบถาวรออกจาก DB)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
